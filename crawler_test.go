@@ -70,9 +70,10 @@ func Test_returnLocalLinks(t *testing.T) {
 	}
 }
 
-func Test_crawl(t *testing.T) {
+func Test_returnAllLinks(t *testing.T) {
 	type args struct {
-		url string
+		url        string
+		linksFound []string
 	}
 	tests := []struct {
 		name string
@@ -81,7 +82,9 @@ func Test_crawl(t *testing.T) {
 	}{
 		{name: "Test1",
 			args: args{
-				url: "http://mock.eduardohitek.com/"},
+				url:        "http://mock.eduardohitek.com/",
+				linksFound: []string{},
+			},
 			want: []string{
 				"http://mock.eduardohitek.com/a.html",
 				"http://mock.eduardohitek.com/b.html",
@@ -96,8 +99,64 @@ func Test_crawl(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := crawl(tt.args.url); !reflect.DeepEqual(got, tt.want) {
+			if got := returnAllLinks(tt.args.url, tt.args.linksFound); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("crawl() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_isLinkFound(t *testing.T) {
+	type args struct {
+		link       string
+		linksFound []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{name: "Test1", args: args{
+			link:       "http://monzo.com/about",
+			linksFound: []string{"http://monzo.com"},
+		}, want: false},
+		{name: "Test2", args: args{
+			link:       "http://monzo.com/about",
+			linksFound: []string{"http://monzo.com", "http://monzo.com/about"},
+		}, want: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isLinkFound(tt.args.link, tt.args.linksFound); got != tt.want {
+				t.Errorf("isLinkFound() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_addLinkToList(t *testing.T) {
+	type args struct {
+		link       string
+		linksFound []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{name: "Test1", args: args{
+			link:       "http://monzo.com/about",
+			linksFound: []string{"http://monzo.com"},
+		}, want: []string{"http://monzo.com", "http://monzo.com/about"}},
+		{name: "Test2", args: args{
+			link:       "http://monzo.com/about",
+			linksFound: []string{"http://monzo.com", "http://monzo.com/about"},
+		}, want: []string{"http://monzo.com", "http://monzo.com/about"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := addLinkToList(tt.args.link, tt.args.linksFound); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("addLinkToList() = %v, want %v", got, tt.want)
 			}
 		})
 	}

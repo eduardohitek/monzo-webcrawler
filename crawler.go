@@ -31,7 +31,23 @@ func returnLocalLinks(baseURL string, links []string) (localLinks []string) {
 	return ret
 }
 
-func crawl(url string) []string {
+func isLinkFound(link string, linksFound []string) bool {
+	for _, linkFound := range linksFound {
+		if link == linkFound {
+			return true
+		}
+	}
+	return false
+}
+
+func addLinkToList(link string, linksFound []string) []string {
+	if !isLinkFound(link, linksFound) {
+		linksFound = append(linksFound, link)
+	}
+	return linksFound
+}
+
+func returnAllLinks(url string, linksFound []string) []string {
 	var links []string
 	req, _ := http.NewRequest("GET", url, nil)
 	client := &http.Client{}
@@ -47,7 +63,7 @@ func crawl(url string) []string {
 			for _, attr := range token.Attr {
 				if attr.Key == "href" {
 					link := formatURL(url, attr.Val)
-					links = append(links, link)
+					linksFound = addLinkToList(link, linksFound)
 				}
 			}
 		}
